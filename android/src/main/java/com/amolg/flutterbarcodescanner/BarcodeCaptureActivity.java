@@ -30,6 +30,7 @@ import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.vision.Tracker;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.core.app.ActivityCompat;
@@ -209,8 +210,16 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         // create a separate tracker instance for each barcode.
         BarcodeDetector barcodeDetector = new BarcodeDetector.Builder(context).build();
         BarcodeTrackerFactory barcodeFactory = new BarcodeTrackerFactory(mGraphicOverlay, this);
+
+//        BarcodeGraphic graphic = new BarcodeGraphic(mGraphicOverlay);
+//        Tracker<Barcode> myTracker =  new BarcodeGraphicTracker(mGraphicOverlay, graphic, this);
+//
+//        barcodeDetector.setProcessor(
+//                new CentralBarcodeFocusingProcessor(barcodeDetector,myTracker));
         barcodeDetector.setProcessor(
                 new MultiProcessor.Builder<>(barcodeFactory).build());
+
+
 
         if (!barcodeDetector.isOperational()) {
             // Check for low storage.  If there is low storage, the native library will not be
@@ -390,7 +399,8 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
 
                        
 
-        if (best != null) {        
+        if (best != null) {
+            Log.i("sss", best.rawValue);
             Intent data = new Intent();
             data.putExtra(BarcodeObject, best); 
             
@@ -531,28 +541,34 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
 
     @Override
     public void onBarcodeDetected(Barcode barcode) {
-        float centerHeight = AppUtil.dpToPx(getApplicationContext(), AppUtil.getHeight(getApplicationContext())) / 2  ;
-        float centerWidth = AppUtil.getWidth(getApplicationContext()) / 2;
+        double centerHeight =(AppUtil.getHeight(getApplicationContext()) / AppUtil.getDPI(getApplicationContext()) ) - 225 ;
+        double centerWidth = AppUtil.getWidth(getApplicationContext()) / 2;
         if (null != barcode) {
             if (FlutterBarcodeScannerPlugin.isContinuousScan) {
                 FlutterBarcodeScannerPlugin.onBarcodeScanReceiver(barcode);
             } else {
-               
-
-                Log.i("barcode.rawValue",barcode.rawValue + ": " +    barcode.getBoundingBox()   );
-
-                 Log.i("barcode.centerHeight", centerHeight+ " " +   centerWidth   );
-                Log.i("barcode.centerHeight", barcode.getBoundingBox().top+ " " +   barcode.getBoundingBox().bottom   );
-
                 int topRec =  barcode.getBoundingBox().top;
                 int bottomRec = barcode.getBoundingBox().bottom;
 
-                if(centerHeight >= topRec && centerHeight <= bottomRec){
+                int[] location = new int[2];  
+          
+ 
+                mGraphicOverlay.getLocationOnScreen(location);
+                double x = (centerWidth - location[0]) / mGraphicOverlay.getWidthScaleFactor();
+                double y = (centerHeight - location[1]) / mGraphicOverlay.getHeightScaleFactor();
+
+                Log.i("barcode.getDPI", AppUtil.getDPI(getApplicationContext()) + "  " +  mCameraSource.getPreviewSize() + " " + mPreview.getHeight() + " " +  AppUtil.getHeight(getApplicationContext()));
+
+
+                Log.i("barcode.centerHeight", barcode.rawValue + " " +   topRec + " <= " + 540 + " <= " +   bottomRec )  ;
+
+
+                 if(centerHeight >= topRec && centerHeight <= bottomRec ){
                     Intent data = new Intent();
                     data.putExtra(BarcodeObject, barcode);
                     setResult(CommonStatusCodes.SUCCESS, data);
                     finish();
-                }
+                 }
                  
  
                 

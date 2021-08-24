@@ -171,7 +171,7 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
         line.setColor(lineColor);
         line.setStrokeWidth(Float.valueOf(lineWidth));
 
-        canvas.drawLine(left, top + top/2 , left + AppUtil.dpToPx(getContext(), rectWidth   ), top + top/2 , line);
+        canvas.drawLine(left, top  , left + AppUtil.dpToPx(getContext(), rectWidth   ), top  , line);
         invalidate();
     }
 }
