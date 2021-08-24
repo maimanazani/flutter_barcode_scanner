@@ -17,6 +17,7 @@ package com.amolg.flutterbarcodescanner;
 
 import android.content.Context;
 import androidx.annotation.UiThread;
+import android.util.Log;
 
 import com.amolg.flutterbarcodescanner.camera.GraphicOverlay;
 import com.google.android.gms.vision.Detector;
@@ -60,7 +61,6 @@ public class BarcodeGraphicTracker extends Tracker<Barcode> {
     @Override
     public void onNewItem(int id, Barcode item) {
         mGraphic.setId(id);
-        mBarcodeUpdateListener.onBarcodeDetected(item);
     }
 
     /**
@@ -70,6 +70,8 @@ public class BarcodeGraphicTracker extends Tracker<Barcode> {
     public void onUpdate(Detector.Detections<Barcode> detectionResults, Barcode item) {
         mOverlay.add(mGraphic);
         mGraphic.updateItem(item);
+        mBarcodeUpdateListener.onBarcodeDetected(item);
+
     }
 
     /**

@@ -28,7 +28,6 @@ import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -55,6 +54,7 @@ import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
+import com.amolg.flutterbarcodescanner.utils.AppUtil;
 
 import java.io.IOException;
 
@@ -358,7 +358,9 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
      */
     private boolean onTap(float rawX, float rawY) {
         // Find tap point in preview frame coordinates.
-        int[] location = new int[2];
+        int[] location = new int[2];  
+          
+ 
         mGraphicOverlay.getLocationOnScreen(location);
         float x = (rawX - location[0]) / mGraphicOverlay.getWidthScaleFactor();
         float y = (rawY - location[1]) / mGraphicOverlay.getHeightScaleFactor();
@@ -368,23 +370,30 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         float bestDistance = Float.MAX_VALUE;
         for (BarcodeGraphic graphic : mGraphicOverlay.getGraphics()) {
             Barcode barcode = graphic.getBarcode();
+
             if (barcode.getBoundingBox().contains((int) x, (int) y)) {
                 // Exact hit, no need to keep looking.
                 best = barcode;
                 break;
             }
+
             float dx = x - barcode.getBoundingBox().centerX();
             float dy = y - barcode.getBoundingBox().centerY();
+
             float distance = (dx * dx) + (dy * dy);  // actually squared distance
+
             if (distance < bestDistance) {
                 best = barcode;
                 bestDistance = distance;
             }
         }
 
-        if (best != null) {
+                       
+
+        if (best != null) {        
             Intent data = new Intent();
-            data.putExtra(BarcodeObject, best);
+            data.putExtra(BarcodeObject, best); 
+            
             setResult(CommonStatusCodes.SUCCESS, data);
             finish();
             return true;
@@ -522,14 +531,31 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
 
     @Override
     public void onBarcodeDetected(Barcode barcode) {
+        float centerHeight = AppUtil.dpToPx(getApplicationContext(), AppUtil.getHeight(getApplicationContext())) / 2  ;
+        float centerWidth = AppUtil.getWidth(getApplicationContext()) / 2;
         if (null != barcode) {
             if (FlutterBarcodeScannerPlugin.isContinuousScan) {
                 FlutterBarcodeScannerPlugin.onBarcodeScanReceiver(barcode);
             } else {
-                Intent data = new Intent();
-                data.putExtra(BarcodeObject, barcode);
-                setResult(CommonStatusCodes.SUCCESS, data);
-                finish();
+               
+
+                Log.i("barcode.rawValue",barcode.rawValue + ": " +    barcode.getBoundingBox()   );
+
+                 Log.i("barcode.centerHeight", centerHeight+ " " +   centerWidth   );
+                Log.i("barcode.centerHeight", barcode.getBoundingBox().top+ " " +   barcode.getBoundingBox().bottom   );
+
+                int topRec =  barcode.getBoundingBox().top;
+                int bottomRec = barcode.getBoundingBox().bottom;
+
+                if(centerHeight >= topRec && centerHeight <= bottomRec){
+                    Intent data = new Intent();
+                    data.putExtra(BarcodeObject, barcode);
+                    setResult(CommonStatusCodes.SUCCESS, data);
+                    finish();
+                }
+                 
+ 
+                
             }
         }
     }

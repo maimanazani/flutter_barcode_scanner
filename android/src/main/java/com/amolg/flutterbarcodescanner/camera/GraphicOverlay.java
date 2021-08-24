@@ -161,6 +161,7 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
         Paint eraser = new Paint();
         eraser.setAntiAlias(true);
         eraser.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+        float center = AppUtil.getHeight(getContext()) / 2;
 
         RectF rect = new RectF(left, top, AppUtil.dpToPx(getContext(), rectWidth) + left, AppUtil.dpToPx(getContext(), rectHeight) + top);
         canvas.drawRoundRect(rect, (float) cornerRadius, (float) cornerRadius, eraser);
@@ -170,20 +171,7 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
         line.setColor(lineColor);
         line.setStrokeWidth(Float.valueOf(lineWidth));
 
-        // draw the line to product animation
-        if (endY >= top + AppUtil.dpToPx(getContext(), rectHeight) + frames) {
-            revAnimation = true;
-        } else if (endY == top + frames) {
-            revAnimation = false;
-        }
-
-        // check if the line has reached to bottom
-        if (revAnimation) {
-            endY -= frames;
-        } else {
-            endY += frames;
-        }
-        canvas.drawLine(left, endY, left + AppUtil.dpToPx(getContext(), rectWidth), endY, line);
+        canvas.drawLine(left, top + top/2 , left + AppUtil.dpToPx(getContext(), rectWidth   ), top + top/2 , line);
         invalidate();
     }
 }
