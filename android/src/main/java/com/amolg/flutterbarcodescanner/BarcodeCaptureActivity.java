@@ -28,6 +28,7 @@ import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.vision.Tracker;
@@ -84,9 +85,11 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
     private GestureDetector gestureDetector;
 
     private ImageView imgViewBarcodeCaptureUseFlash;
-    private ImageView imgViewSwitchCamera;
+    private ImageView imgViewCheckbox;
 
     public static int SCAN_MODE = SCAN_MODE_ENUM.QR.ordinal();
+
+    private Barcode mBarcode;
 
     public enum SCAN_MODE_ENUM {
         QR,
@@ -112,33 +115,35 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
 
             String buttonText = "";
             try {
-                    buttonText = (String) getIntent().getStringExtra("cancelButtonText");
-        } catch (Exception e) {
-            buttonText = "Cancel";
-            Log.e("BCActivity:onCreate()", "onCreate: " + e.getLocalizedMessage());
-        }
+                buttonText = (String) getIntent().getStringExtra("cancelButtonText");
+            } catch (Exception e) {
+                buttonText = "Cancel";
+                Log.e("BCActivity:onCreate()", "onCreate: " + e.getLocalizedMessage());
+            }
 
-        Button btnBarcodeCaptureCancel = findViewById(R.id.btnBarcodeCaptureCancel);
-        btnBarcodeCaptureCancel.setText(buttonText);
-        btnBarcodeCaptureCancel.setOnClickListener(this);
+            Button btnBarcodeCaptureCancel = findViewById(R.id.btnBarcodeCaptureCancel);
+            btnBarcodeCaptureCancel.setText(buttonText);
+            btnBarcodeCaptureCancel.setOnClickListener(this);
 
-        imgViewBarcodeCaptureUseFlash = findViewById(R.id.imgViewBarcodeCaptureUseFlash);
-        imgViewBarcodeCaptureUseFlash.setOnClickListener(this);
-        imgViewBarcodeCaptureUseFlash.setVisibility(FlutterBarcodeScannerPlugin.isShowFlashIcon ? View.VISIBLE : View.GONE);
+            imgViewBarcodeCaptureUseFlash = findViewById(R.id.imgViewBarcodeCaptureUseFlash);
+            imgViewBarcodeCaptureUseFlash.setOnClickListener(this);
+            imgViewBarcodeCaptureUseFlash.setVisibility(FlutterBarcodeScannerPlugin.isShowFlashIcon ? View.VISIBLE : View.GONE);
 
-        imgViewSwitchCamera = findViewById(R.id.imgViewSwitchCamera);
-        imgViewSwitchCamera.setOnClickListener(this);
+            imgViewCheckbox = findViewById(R.id.imgViewCheck);
+            imgViewCheckbox.setOnClickListener(this);
+            toggleButton(false);
 
-        mPreview = findViewById(R.id.preview);
-        mGraphicOverlay = findViewById(R.id.graphicOverlay);
 
-        // read parameters from the intent used to launch the activity.
-        boolean autoFocus = true;
-        boolean useFlash = false;
+            mPreview = findViewById(R.id.preview);
+            mGraphicOverlay = findViewById(R.id.graphicOverlay);
 
-        // Check for the camera permission before accessing the camera.  If the
-        // permission is not granted yet, request permission.
-        int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+            // read parameters from the intent used to launch the activity.
+            boolean autoFocus = true;
+            boolean useFlash = false;
+
+            // Check for the camera permission before accessing the camera.  If the
+            // permission is not granted yet, request permission.
+            int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
             if (rc == PackageManager.PERMISSION_GRANTED) {
                 createCameraSource(autoFocus, useFlash, CameraSource.CAMERA_FACING_BACK);
             } else {
@@ -211,14 +216,8 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         BarcodeDetector barcodeDetector = new BarcodeDetector.Builder(context).build();
         BarcodeTrackerFactory barcodeFactory = new BarcodeTrackerFactory(mGraphicOverlay, this);
 
-//        BarcodeGraphic graphic = new BarcodeGraphic(mGraphicOverlay);
-//        Tracker<Barcode> myTracker =  new BarcodeGraphicTracker(mGraphicOverlay, graphic, this);
-//
-//        barcodeDetector.setProcessor(
-//                new CentralBarcodeFocusingProcessor(barcodeDetector,myTracker));
         barcodeDetector.setProcessor(
                 new MultiProcessor.Builder<>(barcodeFactory).build());
-
 
 
         if (!barcodeDetector.isOperational()) {
@@ -367,9 +366,9 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
      */
     private boolean onTap(float rawX, float rawY) {
         // Find tap point in preview frame coordinates.
-        int[] location = new int[2];  
-          
- 
+        int[] location = new int[2];
+
+
         mGraphicOverlay.getLocationOnScreen(location);
         float x = (rawX - location[0]) / mGraphicOverlay.getWidthScaleFactor();
         float y = (rawY - location[1]) / mGraphicOverlay.getHeightScaleFactor();
@@ -397,13 +396,12 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
             }
         }
 
-                       
 
         if (best != null) {
             Log.i("sss", best.rawValue);
             Intent data = new Intent();
-            data.putExtra(BarcodeObject, best); 
-            
+            data.putExtra(BarcodeObject, best);
+
             setResult(CommonStatusCodes.SUCCESS, data);
             finish();
             return true;
@@ -436,12 +434,14 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
             barcode.displayValue = "-1";
             FlutterBarcodeScannerPlugin.onBarcodeScanReceiver(barcode);
             finish();
-        } else if (i == R.id.imgViewSwitchCamera) {
-            int currentFacing = mCameraSource.getCameraFacing();
-            boolean autoFocus = mCameraSource.getFocusMode() != null;
-            boolean useFlash = flashStatus == USE_FLASH.ON.ordinal();
-            createCameraSource(autoFocus, useFlash, getInverseCameraFacing(currentFacing));
-            startCameraSource();
+        } else if (i == R.id.imgViewCheck) {
+            if (mBarcode != null) {
+                Intent data = new Intent();
+                data.putExtra(BarcodeObject, mBarcode);
+                setResult(CommonStatusCodes.SUCCESS, data);
+                finish();
+            }
+
         }
     }
 
@@ -539,40 +539,45 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         }
     }
 
+    public void toggleButton(Boolean isEnable) {
+        if (isEnable) {
+            imgViewCheckbox.setImageResource(R.drawable.ic_check_box_enable);
+            imgViewCheckbox.setEnabled(true);
+        } else {
+            imgViewCheckbox.setImageResource(R.drawable.ic_check_box_disable);
+            imgViewCheckbox.setEnabled(false);
+        }
+    }
+
     @Override
     public void onBarcodeDetected(Barcode barcode) {
-        double centerHeight =(AppUtil.getHeight(getApplicationContext()) / AppUtil.getDPI(getApplicationContext()) ) - 225 ;
+        double centerHeight = (AppUtil.getHeight(getApplicationContext()) / AppUtil.getDPI(getApplicationContext())) - 225;
         double centerWidth = AppUtil.getWidth(getApplicationContext()) / 2;
+
         if (null != barcode) {
             if (FlutterBarcodeScannerPlugin.isContinuousScan) {
                 FlutterBarcodeScannerPlugin.onBarcodeScanReceiver(barcode);
             } else {
-                int topRec =  barcode.getBoundingBox().top;
+                int topRec = barcode.getBoundingBox().top;
                 int bottomRec = barcode.getBoundingBox().bottom;
 
-                int[] location = new int[2];  
-          
- 
-                mGraphicOverlay.getLocationOnScreen(location);
-                double x = (centerWidth - location[0]) / mGraphicOverlay.getWidthScaleFactor();
-                double y = (centerHeight - location[1]) / mGraphicOverlay.getHeightScaleFactor();
+                if (centerHeight >= topRec && centerHeight <= bottomRec) {
+                    mBarcode = barcode;
+                    mGraphicOverlay.setBarcode(barcode);
+                    toggleButton(true);
 
-                Log.i("barcode.getDPI", AppUtil.getDPI(getApplicationContext()) + "  " +  mCameraSource.getPreviewSize() + " " + mPreview.getHeight() + " " +  AppUtil.getHeight(getApplicationContext()));
+                } else {
+                    mGraphicOverlay.setBarcode(null);
+                    toggleButton(false);
+                    mBarcode = null;
+                }
 
 
-                Log.i("barcode.centerHeight", barcode.rawValue + " " +   topRec + " <= " + 540 + " <= " +   bottomRec )  ;
-
-
-                 if(centerHeight >= topRec && centerHeight <= bottomRec ){
-                    Intent data = new Intent();
-                    data.putExtra(BarcodeObject, barcode);
-                    setResult(CommonStatusCodes.SUCCESS, data);
-                    finish();
-                 }
-                 
- 
-                
             }
+        } else {
+            mGraphicOverlay.setBarcode(null);
+            toggleButton(false);
+            mBarcode = null;
         }
     }
 }

@@ -23,6 +23,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 
@@ -30,6 +31,7 @@ import com.amolg.flutterbarcodescanner.BarcodeCaptureActivity;
 import com.amolg.flutterbarcodescanner.FlutterBarcodeScannerPlugin;
 import com.amolg.flutterbarcodescanner.constants.AppConstants;
 import com.amolg.flutterbarcodescanner.utils.AppUtil;
+import com.google.android.gms.vision.barcode.Barcode;
 
 import java.util.HashSet;
 import java.util.List;
@@ -50,6 +52,7 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
     private float left, top, endY;
     private int rectWidth, rectHeight, frames, lineColor, lineWidth;
     private boolean revAnimation;
+     private Barcode barcode;
 
 
     public static abstract class Graphic {
@@ -152,6 +155,10 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
         postInvalidate();
     }
 
+    public void setBarcode(Barcode barcodeItem) {
+        barcode = barcodeItem;
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -171,7 +178,24 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
         line.setColor(lineColor);
         line.setStrokeWidth(Float.valueOf(lineWidth));
 
-        canvas.drawLine(left, top  , left + AppUtil.dpToPx(getContext(), rectWidth   ), top  , line);
+        canvas.drawLine(left, top, left + AppUtil.dpToPx(getContext(), rectWidth), top, line);
+
+        Paint paint = new Paint();
+
+        paint.setColor(Color.WHITE);
+        paint.setTextSize(20);
+
+
+
+        if (null != barcode) {
+            canvas.drawText("Barcode detected: " + barcode.displayValue, 10, left + AppUtil.dpToPx(getContext(), rectWidth) + top/2, paint);
+            canvas.drawText("Press checkbox to continue", 10, left + AppUtil.dpToPx(getContext(), rectWidth) + top/2 + 50, paint);
+
+        }else{
+            canvas.drawText("Detecting barcode...", 10, left + AppUtil.dpToPx(getContext(), rectWidth) + top/2, paint);
+        }
+
+
         invalidate();
     }
 }

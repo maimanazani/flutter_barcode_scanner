@@ -8,6 +8,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/swiss/Desktop/Barcode/flutter_barcode_scanner/android/src/main/res/drawable/ic_barcode_flash_off.xml" value="0.37083333333333335" />
+        <entry key="..\:/Users/swiss/Desktop/Barcode/flutter_barcode_scanner/android/src/main/res/drawable/ic_barcode_flash_on.xml" value="0.37083333333333335" />
+        <entry key="..\:/Users/swiss/Desktop/Barcode/flutter_barcode_scanner/android/src/main/res/drawable/ic_check_box.xml" value="0.37083333333333335" />
+        <entry key="..\:/Users/swiss/Desktop/Barcode/flutter_barcode_scanner/android/src/main/res/drawable/ic_check_box_disable.xml" value="0.37083333333333335" />
+        <entry key="..\:/Users/swiss/Desktop/Barcode/flutter_barcode_scanner/android/src/main/res/drawable/ic_switch_camera.xml" value="0.37083333333333335" />
         <entry key="..\:/Users/swiss/Desktop/Barcode/flutter_barcode_scanner/android/src/main/res/layout/barcode_capture.xml" value="0.3546875" />
       </map>
     </option>
