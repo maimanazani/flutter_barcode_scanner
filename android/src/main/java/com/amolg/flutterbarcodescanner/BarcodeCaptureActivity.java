@@ -37,6 +37,7 @@ import com.google.android.material.snackbar.Snackbar;
 import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -90,6 +91,18 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
     public static int SCAN_MODE = SCAN_MODE_ENUM.QR.ordinal();
 
     private Barcode mBarcode;
+    private Boolean timerIsRunning = false;
+
+    private CountDownTimer timer = new CountDownTimer(4000, 1000) {
+
+        public void onTick(long millisUntilFinished) {
+            mGraphicOverlay.setTimer( (millisUntilFinished/1000) + 1);
+        }
+
+        public void onFinish() {
+            finishScanning();
+        }
+    };
 
     public enum SCAN_MODE_ENUM {
         QR,
@@ -435,13 +448,17 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
             FlutterBarcodeScannerPlugin.onBarcodeScanReceiver(barcode);
             finish();
         } else if (i == R.id.imgViewCheck) {
-            if (mBarcode != null) {
-                Intent data = new Intent();
-                data.putExtra(BarcodeObject, mBarcode);
-                setResult(CommonStatusCodes.SUCCESS, data);
-                finish();
-            }
+            finishScanning();
 
+        }
+    }
+
+    private void finishScanning() {
+        if (mBarcode != null) {
+            Intent data = new Intent();
+            data.putExtra(BarcodeObject, mBarcode);
+            setResult(CommonStatusCodes.SUCCESS, data);
+            finish();
         }
     }
 
@@ -555,6 +572,12 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         double centerWidth = AppUtil.getWidth(getApplicationContext()) / 2;
 
         if (null != barcode) {
+
+            // dia detect semua barcode
+            // barcodeA
+            // barcodeB
+
+
             if (FlutterBarcodeScannerPlugin.isContinuousScan) {
                 FlutterBarcodeScannerPlugin.onBarcodeScanReceiver(barcode);
             } else {
@@ -562,16 +585,27 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
                 int bottomRec = barcode.getBoundingBox().bottom;
 
                 if (centerHeight >= topRec && centerHeight <= bottomRec) {
+                    // barcode yg hit line merah
+                    // focus on barcodeB
+                    //mBarcode = barcodeB;
+                    //timerIsRunning = false;
+                    // barcode = barcodeA, barcode = barcodeB
+
+                    // for the first time red line hit barcode
+                    if (!timerIsRunning) {
+                        timer.start();
+                        timerIsRunning = true;
+                    } else if (!mBarcode.rawValue.equals(barcode.rawValue)) {
+                        timer.cancel();
+                        timer.start();
+                    }
+
+
                     mBarcode = barcode;
                     mGraphicOverlay.setBarcode(barcode);
                     toggleButton(true);
 
-                } else {
-                    mGraphicOverlay.setBarcode(null);
-                    toggleButton(false);
-                    mBarcode = null;
                 }
-
 
             }
         } else {
@@ -580,4 +614,18 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
             mBarcode = null;
         }
     }
+
+    @Override
+    public void onBarcodeMissing() {
+        mGraphicOverlay.setBarcode(null);
+        toggleButton(false);
+        mBarcode = null;
+        if (timerIsRunning) {
+            timer.cancel();
+            timerIsRunning = false;
+        }
+
+    }
+
+
 }

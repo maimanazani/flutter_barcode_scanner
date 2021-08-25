@@ -52,7 +52,8 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
     private float left, top, endY;
     private int rectWidth, rectHeight, frames, lineColor, lineWidth;
     private boolean revAnimation;
-     private Barcode barcode;
+    private Barcode barcode;
+    private long timerCountdown;
 
 
     public static abstract class Graphic {
@@ -159,6 +160,10 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
         barcode = barcodeItem;
     }
 
+    public void setTimer(long second) {
+        timerCountdown = second;
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -183,16 +188,24 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
         Paint paint = new Paint();
 
         paint.setColor(Color.WHITE);
-        paint.setTextSize(20);
+        paint.setTextSize(20 * AppUtil.getDPI(getContext()));
 
-
+//        if(null != barcode){
+//            RectF barcodeGraphic = new RectF(barcode.getBoundingBox());
+//            Paint mRectPaint   = new Paint();
+//            mRectPaint.setColor(Color.GREEN);
+//            mRectPaint.setStyle(Paint.Style.STROKE);
+//            mRectPaint.setStrokeWidth(4.0f);
+//
+//            canvas.drawRect(barcodeGraphic, mRectPaint);
+//        }
 
         if (null != barcode) {
-            canvas.drawText("Barcode detected: " + barcode.displayValue, 10, left + AppUtil.dpToPx(getContext(), rectWidth) + top/2, paint);
-            canvas.drawText("Press checkbox to continue", 10, left + AppUtil.dpToPx(getContext(), rectWidth) + top/2 + 50, paint);
+            canvas.drawText("Barcode detected: " + barcode.displayValue, 10, left + AppUtil.dpToPx(getContext(), rectWidth) + top / 2, paint);
+            canvas.drawText("Press checkbox to continue or wait " + timerCountdown + " s...", 10, left + AppUtil.dpToPx(getContext(), rectWidth) + top / 2 + (40 * AppUtil.getDPI(getContext())), paint);
 
-        }else{
-            canvas.drawText("Detecting barcode...", 10, left + AppUtil.dpToPx(getContext(), rectWidth) + top/2, paint);
+        } else {
+            canvas.drawText("Detecting barcode...", 10, left + AppUtil.dpToPx(getContext(), rectWidth) + top / 2, paint);
         }
 
 
