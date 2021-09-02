@@ -568,16 +568,11 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
 
     @Override
     public void onBarcodeDetected(Barcode barcode) {
-        double centerHeight = (AppUtil.getHeight(getApplicationContext()) / AppUtil.getDPI(getApplicationContext())) - 225;
-        double centerWidth = AppUtil.getWidth(getApplicationContext()) / 2;
+//        double centerHeight = (AppUtil.getHeight(getApplicationContext()) / AppUtil.getDPI(getApplicationContext())) - 225;
+        double centerHeight = (AppUtil.getHeight(getApplicationContext()) / AppUtil.getDPI(getApplicationContext()))  + 225;
+
 
         if (null != barcode) {
-
-            // dia detect semua barcode
-            // barcodeA
-            // barcodeB
-
-
             if (FlutterBarcodeScannerPlugin.isContinuousScan) {
                 FlutterBarcodeScannerPlugin.onBarcodeScanReceiver(barcode);
             } else {
@@ -585,13 +580,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
                 int bottomRec = barcode.getBoundingBox().bottom;
 
                 if (centerHeight >= topRec && centerHeight <= bottomRec) {
-                    // barcode yg hit line merah
-                    // focus on barcodeB
-                    //mBarcode = barcodeB;
-                    //timerIsRunning = false;
-                    // barcode = barcodeA, barcode = barcodeB
 
-                    // for the first time red line hit barcode
                     if (!timerIsRunning) {
                         timer.start();
                         timerIsRunning = true;
