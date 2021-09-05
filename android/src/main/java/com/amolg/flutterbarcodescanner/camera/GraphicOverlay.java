@@ -173,7 +173,7 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
         Paint eraser = new Paint();
         eraser.setAntiAlias(true);
         eraser.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-        float center = AppUtil.getHeight(getContext()) / 2;
+//        float center = AppUtil.getHeight(getContext()) / 2;
 
         RectF rect = new RectF(left, top, AppUtil.dpToPx(getContext(), rectWidth) + left, AppUtil.dpToPx(getContext(), rectHeight) + top);
         canvas.drawRoundRect(rect, (float) cornerRadius, (float) cornerRadius, eraser);
@@ -183,7 +183,18 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
         line.setColor(lineColor);
         line.setStrokeWidth(Float.valueOf(lineWidth));
 
-        canvas.drawLine(left, AppUtil.getHeight(getContext()) / 2, left + AppUtil.dpToPx(getContext(), rectWidth), AppUtil.getHeight(getContext()) / 2 , line);
+        float middleHeight = (AppUtil.getHeight(getContext()) - AppUtil.dpToPx(getContext(), 60)) / 2;
+
+        canvas.drawLine(left,middleHeight , left + AppUtil.dpToPx(getContext(), rectWidth), middleHeight , line);
+
+        // draw horizontal line
+//        Paint calibrationLine = new Paint();
+//        calibrationLine.setColor(Color.GREEN);
+//        calibrationLine.setStrokeWidth(12F);
+//
+//        float centerHeight = (AppUtil.getHeight(getContext()) / AppUtil.getDPI(getContext()))  ;
+//        canvas.drawLine(left, centerHeight, left + AppUtil.dpToPx(getContext(), rectWidth), centerHeight , calibrationLine);
+
 
         Paint paint = new Paint();
 

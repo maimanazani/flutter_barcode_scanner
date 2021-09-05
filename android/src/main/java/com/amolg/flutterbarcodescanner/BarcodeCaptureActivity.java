@@ -89,6 +89,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
     private ImageView imgViewCheckbox;
 
     public static int SCAN_MODE = SCAN_MODE_ENUM.QR.ordinal();
+    public static  int OFF_SET = 0;
 
     private Barcode mBarcode;
     private Boolean timerIsRunning = false;
@@ -569,7 +570,8 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
     @Override
     public void onBarcodeDetected(Barcode barcode) {
 //        double centerHeight = (AppUtil.getHeight(getApplicationContext()) / AppUtil.getDPI(getApplicationContext())) - 225;
-        double centerHeight = (AppUtil.getHeight(getApplicationContext()) / AppUtil.getDPI(getApplicationContext()))  + 225;
+        double centerHeight = (AppUtil.getHeight(getApplicationContext()) / AppUtil.getDPI(getApplicationContext())) + OFF_SET  ;
+
 
 
         if (null != barcode) {
