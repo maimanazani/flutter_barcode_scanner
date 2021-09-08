@@ -155,7 +155,10 @@ public class FlutterBarcodeScannerPlugin implements MethodCallHandler, ActivityR
                 if (data != null) {
                     try {
                         Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
-                        String barcodeResult = barcode.rawValue;
+                        String barcodeResult = barcode.displayValue;
+                        Log.i(TAG, "onActivityResult: " + barcode.rawValue);
+                        Log.i(TAG, "onActivityResult: " + barcode.displayValue);
+
                         pendingResult.success(barcodeResult);
                     } catch (Exception e) {
                         pendingResult.success("-1");
