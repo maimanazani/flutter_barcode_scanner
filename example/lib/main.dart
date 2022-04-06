@@ -61,7 +61,7 @@ class _MyAppState extends State<MyApp> {
         'Cancel',
         true,
         ScanMode.BARCODE,
-        100,
+        0,
       );
       print(barcodeScanRes);
     } on PlatformException {
