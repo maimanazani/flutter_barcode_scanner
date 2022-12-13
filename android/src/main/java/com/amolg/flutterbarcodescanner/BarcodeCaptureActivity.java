@@ -96,7 +96,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity
     private Barcode mBarcode;
     private Boolean timerIsRunning = false;
 
-    private CountDownTimer timer = new CountDownTimer(500, 1000) {
+    private CountDownTimer timer = new CountDownTimer(1, 1000) {
 
         public void onTick(long millisUntilFinished) {
             mGraphicOverlay.setTimer((millisUntilFinished / 1000) + 1);
